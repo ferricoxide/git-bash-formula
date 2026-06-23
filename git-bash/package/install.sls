@@ -69,8 +69,12 @@ Extract Git Bash Archive:
         ['/DIR=', '"', install_prefix, '"'] | join
       ] | join(" ") %}
   {%- set cmd_exec = [
-        '"', installer_path, '"', ' ', cmd_args
-      ] | join %}
+        "Start-Process",
+        "-FilePath '" ~ installer_path ~ "'",
+        "-ArgumentList '" ~ cmd_args ~ "'",
+        "-NoNewWindow",
+        "-Wait"
+      ] | join(" ") %}
   {%- set check_path = [
         install_prefix, "git-bash.exe"
       ] | join("\\") %}
