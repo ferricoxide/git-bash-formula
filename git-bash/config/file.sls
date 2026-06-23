@@ -10,19 +10,10 @@
 include:
   - {{ sls_package_install }}
 
-git-bash-config-file-file-managed:
-  file.managed:
-    - name: {{ git_bash.config }}
-    - source: {{ files_switch(['example.tmpl'],
-                              lookup='git-bash-config-file-file-managed'
-                 )
-              }}
-    - mode: 644
-    - user: root
-    - group: {{ git_bash.rootgroup }}
-    - makedirs: True
-    - template: jinja
-    - require:
-      - sls: {{ sls_package_install }}
-    - context:
-        git_bash: {{ git_bash | json }}
+TBD:
+  test.show_notification:
+    - text: |
+        -----------------------------------
+        No configuration tasks have been
+        Authored, yet
+        -----------------------------------
