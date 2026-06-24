@@ -28,7 +28,7 @@ Configure Corporate Shell Profile:
       - sls: {{ sls_package_install }}
     - source: {{ files_switch(['corporate.sh.tpl'],
                               lookup='Configure Corporate Shell Profile'
-                 )
+                  )
               }}
     - template: jinja
 
