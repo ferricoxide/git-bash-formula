@@ -10,19 +10,69 @@
 include:
   - {{ sls_package_install }}
 
-git-bash-config-file-file-managed:
+{%- set config = git_bash.get('config') or {} %}
+{%- set install_prefix = config.get(
+      'install_root', 'C:\\Program Files\\Git'
+    ) %}
+{%- set gitconfig_path = [install_prefix, 'etc', 'gitconfig'] | join('\\') %}
+{%- set profile_path = [
+      install_prefix, 'etc', 'profile.d', 'corporate.sh'
+    ] | join('\\') %}
+
+{%- set bash_target = [install_prefix, 'bin', 'bash.exe'] | join('\\') %}
+{%- set icon_target = [
+      install_prefix, 'mingw64', 'share', 'git', 'git-for-windows.ico'
+    ] | join('\\') %}
+
+{%- set desktop_lnk = [
+      'C:\\Users\\Public\\Desktop', 'Git Bash.lnk'
+    ] | join('\\') %}
+{%- set start_lnk = [
+      'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs',
+      'Git Bash.lnk'
+    ] | join('\\') %}
+
+Configure Corporate Shell Profile:
   file.managed:
-    - name: {{ git_bash.config }}
-    - source: {{ files_switch(['example.tmpl'],
-                              lookup='git-bash-config-file-file-managed'
-                 )
-              }}
-    - mode: 644
-    - user: root
-    - group: {{ git_bash.rootgroup }}
-    - makedirs: True
-    - template: jinja
-    - require:
-      - sls: {{ sls_package_install }}
     - context:
         git_bash: {{ git_bash | json }}
+    - name: {{ profile_path | json }}
+    - require:
+      - sls: {{ sls_package_install }}
+    - source: {{ files_switch(['corporate.sh'],
+                              lookup='Configure Corporate Shell Profile'
+                  )
+              }}
+    - template: jinja
+
+Configure System Gitconfig File:
+  ini.options_present:
+    - name: {{ gitconfig_path | json }}
+    - require:
+      - sls: {{ sls_package_install }}
+    - sections:
+        core:
+          autocrlf: true
+          longpaths: true
+        http:
+          sslBackend: schannel
+
+Create Git Bash Desktop Shortcut:
+  file.shortcut:
+    - arguments: '--login -i'
+    - iconlocation: {{ icon_target | json }}
+    - name: {{ desktop_lnk | json }}
+    - require:
+      - sls: {{ sls_package_install }}
+    - target: {{ bash_target | json }}
+    - working_dir: {{ install_prefix | json }}
+
+Create Git Bash Start Menu Shortcut:
+  file.shortcut:
+    - arguments: '--login -i'
+    - iconlocation: {{ icon_target | json }}
+    - name: {{ start_lnk | json }}
+    - require:
+      - sls: {{ sls_package_install }}
+    - target: {{ bash_target | json }}
+    - working_dir: {{ install_prefix | json }}
