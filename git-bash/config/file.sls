@@ -10,10 +10,21 @@
 include:
   - {{ sls_package_install }}
 
-TBD:
-  test.show_notification:
-    - text: |
-        -----------------------------------
-        No configuration tasks have been
-        Authored, yet
-        -----------------------------------
+{%- set config = git_bash.get('config') or {} %}
+{%- set install_prefix = config.get(
+      'install_root', 'C:\\Program Files\\Git'
+    ) %}
+{%- set gitconfig_path = [install_prefix, 'etc', 'gitconfig'] | join('\\') %}
+
+Configure System Gitconfig File:
+  file.managed:
+    - context:
+        git_bash: {{ git_bash | json }}
+    - name: {{ gitconfig_path | json }}
+    - require:
+      - sls: {{ sls_package_install }}
+    - source: {{ files_switch(['gitconfig'],
+                              lookup='Configure System Gitconfig File'
+                 )
+              }}
+    - template: jinja
