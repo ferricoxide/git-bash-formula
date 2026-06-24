@@ -4,15 +4,15 @@
 {#- Get the `tplroot` from `tpldir` #}
 {%- set tplroot = tpldir.split('/')[0] %}
 {%- from tplroot ~ "/map.jinja" import mapdata as git_bash with context %}
-{%- set config = git_bash.get('config', {}) %}
-{%- set pkg = git_bash.get('pkg', {}) %}
+{%- set config = git_bash.get('config') or {} %}
+{%- set pkg = git_bash.get('pkg') or {} %}
+
 {%- set install_prefix = config.get(
       'install_root', 'C:\\Program Files\\Git'
     ) %}
 {%- set skip_verify = false if pkg.get('download_sig') else true %}
 {%- set archive_ext = pkg.get('archive_type') or 'exe' %}
 {%- set match_suffix = "-64-bit." ~ archive_ext %}
-
 {%- set url_ns = {
       'source_url': pkg.get('download_uri', '')
     } %}
